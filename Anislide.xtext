@@ -1,0 +1,124 @@
+grammar org.xtext.example.mydsl.Anislide with org.eclipse.xtext.common.Terminals
+generate anislide "http://www.xtext.org/example/mydsl/Anislide"
+
+//  #################################
+//  ## GLOBAL MODEL
+//  #################################
+
+Model:
+	progressanimations+=ProgressAnimation* &
+	templates+=Template* &
+	slides+=Slide* &
+	global+=Global?
+;
+
+//  #################################
+//  ## GLOBAL
+//  #################################
+Global:
+	"Global" globalbody=GlobalBody	
+;
+
+GlobalBody:
+	OPEN
+		{GlobalBody} styles+=Style*
+	CLOSE
+;
+
+//  #################################
+//  ## PROGRESS ANIMATION
+//  #################################
+
+ProgressAnimation:
+	"Progress" name=ID progressbody=ProgressBody
+;
+
+ProgressBody:
+	OPEN
+		{ProgressBody} progressentities+=ProgressEntity*
+	CLOSE
+;
+
+ProgressEntity: 
+		{Progresstype} key="type:" value=AniType |
+		{Animate} key="animate:" value+=Options*
+;
+
+//  #################################
+//  ## SLIDE
+//  #################################
+
+Slide:
+	"Slide" slidebody=SlideBody
+;
+SlideBody:
+	OPEN
+		{SlideBody} slideentities+=SlideEntity* styles+=Style*
+	CLOSE
+;
+
+SlideEntity:
+	{Title} key='title:' value=STRING |
+	{Tmplt} key='template:' value=[Template] |
+	{Progressanim} key="progress:" value=[ProgressAnimation]
+;
+
+//  #################################
+//  ## TEMPLATE
+//  #################################
+
+Template:
+	"Template" name=ID templatebody=TemplateBody
+;
+
+TemplateBody: 
+	OPEN 
+		{TemplateBody} templateentities+=TemplateEntity* styles+=Style*
+	CLOSE
+;
+
+TemplateEntity: (
+		{Tabular} key="line:" OPEN 'left:' left=BoxType ('right:' right=BoxType)? CLOSE
+	)
+;
+
+//  #################################
+//  ## GLOBAL
+//  #################################
+
+Options: 
+	{Height} key='height:' value=INT unit=Unit |
+	{Width} key='width:' value=INT unit=Unit |
+	{Position} key='position:' value=INT unit=Unit
+;
+Unit: 
+	('px' | '%')
+;
+
+Style:
+	{Textcolor} key="color:" value=STRING |
+	{BackgroundColor} key="background-color:" value=STRING |
+	{Fontsize} key="font-size:" value=INT 
+;
+
+AniType:
+	"image" | "rectangle"
+;
+BoxType:
+	'imagebox' | 'textbox'
+;
+
+//  #################################
+//  ## TERMINALS
+//  #################################
+
+terminal OPEN:
+	'('
+;
+
+terminal CLOSE:
+	')'
+;
+terminal HEX:
+	('0x'|'0X')('0'..'9'|'a'..'f'|'A'..'F')+
+; 
